@@ -29,7 +29,11 @@ HTML montado em JavaScript.
    arquivos `.cshtml` — não em JS. O `wwwroot/js/site.js` que sobrou só faz pequenas
    interações no DOM já renderizado (slider de preço, menu mobile, auto-submit de
    checkbox) — nunca constrói HTML. Os controllers de API (`/api/...`) foram mantidos
-   como uma segunda forma de acessar o backend, autenticados por JWT.
+   como uma segunda forma de acessar o backend, autenticados por JWT. **As rotas mudaram**
+   de hash (`#/dashboard`, `#/clientes`) para caminhos reais (`/dashboard`, `/clientes`) —
+   links antigos salvos como favorito não funcionam mais.
+7. **CSS migrado para SASS** (`Styles/*.scss`), compilado automaticamente pelo
+   `AspNetCore.SassCompiler` — ver seção **Estilos (SASS)**.
 
 ## Stack
 
