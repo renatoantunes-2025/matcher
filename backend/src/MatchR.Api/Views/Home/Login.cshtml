@@ -1,0 +1,33 @@
+@model LoginViewModel
+@{
+    Layout = "_PublicLayout";
+    ViewData["Title"] = "Entrar";
+}
+<div class="auth-shell">
+    <section class="auth-art">
+        <div class="auth-logo-wrap"><img class="logo-full" src="~/assets/logo-matchr-full.png" alt="MatchR"></div>
+        <div class="auth-quote">
+            <div class="kicker" style="color:#fff">Menos pesquisa. Mais relacionamento.</div>
+            <h2>Inteligência para transformar briefings em oportunidades.</h2>
+        </div>
+        <small>MatchR · MVP 2026</small>
+    </section>
+    <section class="auth-panel">
+        <form class="auth-box" method="post" action="/entrar">
+            @Html.AntiForgeryToken()
+            <img src="~/assets/logo-matchr-icon.png" alt="" style="width:72px">
+            <h1>Bem-vindo de volta</h1>
+            <p class="muted">Entre para acessar seus clientes e buscas.</p>
+            <div class="auth-form">
+                @if (!string.IsNullOrEmpty(Model.Error))
+                {
+                    <p class="muted" style="color:var(--danger);font-size:13px">@Model.Error</p>
+                }
+                <div class="form-group"><label>E-mail</label><input class="input" name="Email" type="email" value="@Model.Email" required></div>
+                <div class="form-group"><label>Senha</label><input class="input" name="Password" type="password" required></div>
+                <button class="btn btn-primary" type="submit" style="width:100%">Entrar</button>
+                <a class="btn btn-secondary" href="/" style="width:100%">Voltar para o site</a>
+            </div>
+        </form>
+    </section>
+</div>

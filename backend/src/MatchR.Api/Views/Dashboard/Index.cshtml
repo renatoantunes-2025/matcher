@@ -1,0 +1,78 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Visão geral";
+}
+<div class="card welcome">
+    <span class="pill brand">@Html.Raw(Icons.Spark) MatchR Intelligence</span>
+    <h2>Olá, @Model.FirstName. Qual cliente vamos atender hoje?</h2>
+    <p class="muted">Selecione o cliente e descreva rapidamente o que procura ou abra uma nova busca completa.</p>
+    <form method="post" action="/dashboard/busca-rapida">
+        @Html.AntiForgeryToken()
+        <div class="quick-client">
+            <select class="select" name="clientId" aria-label="Selecionar cliente">
+                <option value="">Selecione o cliente</option>
+                @foreach (var c in Model.Clients)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </select>
+        </div>
+        <div class="quick-search">
+            <input class="input" name="briefing" placeholder="Ex.: cobertura no Itaim, até R$ 6 milhões, 4 dormitórios...">
+            <button class="btn btn-primary quick-search-btn" type="submit">Buscar imóveis</button>
+        </div>
+    </form>
+</div>
+
+<div class="grid stats-grid">
+    <div class="card stat-card"><div class="stat-icon">@Html.Raw(Icons.Users)</div><strong>@Model.ActiveClients</strong><span>Clientes ativos</span></div>
+    <div class="card stat-card"><div class="stat-icon">@Html.Raw(Icons.Search)</div><strong>@Model.SearchesThisMonth</strong><span>Buscas no mês</span></div>
+    <div class="card stat-card"><div class="stat-icon">@Html.Raw(Icons.Heart)</div><strong>@Model.FavoritedProperties</strong><span>Imóveis favoritados</span></div>
+    <div class="card stat-card"><div class="stat-icon">@Html.Raw(Icons.Whatsapp)</div><strong>@Model.SharesSent</strong><span>Seleções enviadas</span></div>
+</div>
+
+<div class="grid dashboard-grid">
+    <section class="card panel">
+        <div class="panel-head"><h3>Clientes recentes</h3><a href="/clientes" class="btn btn-ghost btn-sm">Ver todos</a></div>
+        <div class="client-list">
+            @if (Model.RecentClients.Count == 0)
+            {
+                <div class="empty">Nenhum cliente cadastrado ainda.</div>
+            }
+            else
+            {
+                @foreach (var c in Model.RecentClients)
+                {
+                    <a class="client-row" href="/clientes/@c.Id">
+                        <div class="avatar">@Helpers.Initials(c.Name)</div>
+                        <div class="meta"><strong>@c.Name</strong><small>@c.Searches.Count buscas · último acesso @Helpers.FormatDate(c.LastActivityAt)</small></div>
+                        <span class="status @c.Status.ToString().ToLower()">@c.Status</span>
+                        @Html.Raw(Icons.Arrow)
+                    </a>
+                }
+            }
+        </div>
+    </section>
+    <section class="card panel">
+        <div class="panel-head"><h3>Atividade recente</h3></div>
+        <div class="activity-list">
+            @if (Model.RecentActivity.Count == 0)
+            {
+                <div class="empty">Nenhuma atividade recente.</div>
+            }
+            else
+            {
+                @foreach (var a in Model.RecentActivity)
+                {
+                    <div class="activity">
+                        <div class="activity-dot"></div>
+                        <div>
+                            <p>@(a.Type == ShareEventType.WhatsAppShare ? $"{a.ResultCount} imóveis enviados para {a.Client!.Name}." : $"Nova busca salva para {a.Client!.Name}.")</p>
+                            <time>@Helpers.FormatDate(a.CreatedAt)</time>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+</div>

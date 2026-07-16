@@ -1,0 +1,50 @@
+@model ClientsIndexViewModel
+@{
+    ViewData["Title"] = "Clientes";
+}
+<div class="page-head">
+    <div>
+        <h1>Clientes</h1>
+        <p class="muted">Organize briefings, buscas e oportunidades em um só lugar.</p>
+    </div>
+    <a class="btn btn-primary" href="/clientes/novo">@Html.Raw(Icons.Plus) Novo cliente</a>
+</div>
+
+<div class="toolbar">
+    <div class="search-field">
+        @Html.Raw(Icons.Search)
+        <input class="input" id="clientSearch" placeholder="Buscar por nome, telefone ou e-mail">
+    </div>
+    <select class="select" style="width:auto" id="statusFilter">
+        <option value="">Todos os tipos</option>
+        <option value="Lead">Lead</option>
+        <option value="Cliente">Cliente</option>
+        <option value="Parceiro">Parceiro</option>
+    </select>
+</div>
+
+<div class="card table-wrap">
+    <table class="data-table">
+        <thead><tr><th>Cliente</th><th>Contato</th><th>Tipo</th><th>Buscas</th><th>Última atividade</th><th></th></tr></thead>
+        <tbody id="clientRows">
+            @if (Model.Clients.Count == 0)
+            {
+                <tr><td colspan="6" class="empty">Nenhum cliente cadastrado ainda.</td></tr>
+            }
+            else
+            {
+                @foreach (var c in Model.Clients)
+                {
+                    <tr data-name="@((c.Name + c.Phone + c.Email).ToLower())" data-status="@c.Status">
+                        <td><a href="/clientes/@c.Id" style="display:flex;align-items:center;gap:10px"><div class="avatar">@Helpers.Initials(c.Name)</div><strong>@c.Name</strong></a></td>
+                        <td><div>@(c.Phone ?? "—")</div><small class="muted">@c.Email</small></td>
+                        <td><span class="status @c.Status.ToString().ToLower()">@c.Status</span></td>
+                        <td>@c.Searches.Count</td>
+                        <td>@Helpers.FormatDate(c.LastActivityAt)</td>
+                        <td><a class="icon-btn" href="/clientes/@c.Id">@Html.Raw(Icons.Arrow)</a></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,15 @@
+@model string
+@{
+    ViewData["Title"] = "Compartilhar";
+}
+<div class="card" style="padding:40px;text-align:center;max-width:520px;margin:60px auto">
+    <div class="access-success-icon" style="margin:0 auto 18px">@Html.Raw(Icons.Whatsapp)</div>
+    <h3 style="font-family:Manrope;margin:0 0 10px">Compartilhamento registrado</h3>
+    <p class="muted" style="margin:0 0 22px">Abrindo o WhatsApp com a seleção de imóveis...</p>
+    <a class="btn btn-primary" href="@Model" target="_blank" rel="noopener">Abrir WhatsApp manualmente</a>
+    <a class="btn btn-ghost btn-sm" href="/dashboard" style="margin-top:10px">Voltar ao painel</a>
+</div>
+
+@section Scripts {
+    <script>window.open(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model)), '_blank');</script>
+}

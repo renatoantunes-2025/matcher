@@ -1,0 +1,112 @@
+@model ResultsViewModel
+@{
+    ViewData["Title"] = "Resultados";
+    var selected = Model.Results.Where(r => r.Selected).ToList();
+}
+<div class="results-header">
+    <div>
+        <h1 style="font-family:Manrope;margin:0">@Model.Results.Count imóveis encontrados</h1>
+        <p class="muted">Ordenados por compatibilidade com o briefing de @Model.Search.Client!.Name.</p>
+    </div>
+</div>
+
+<div class="results-layout">
+    <section class="result-list">
+        @if (Model.Results.Count == 0)
+        {
+            <div class="card empty">Nenhum imóvel ativo corresponde a este briefing ainda.</div>
+        }
+        else
+        {
+            @foreach (var r in Model.Results)
+            {
+                var p = r.Property!;
+                var isFav = Model.FavoritePropertyIds.Contains(p.Id);
+                <article class="property-card">
+                    <div class="property-image">
+                        <img src="@p.ImageUrl" alt="@p.Title">
+                        <span class="score-badge">@r.Score% Match</span>
+                        <div class="property-actions-top">
+                            <form method="post" action="/resultados/@Model.Search.Id/favoritar">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="propertyId" value="@p.Id">
+                                <button class="icon-btn favorite @(isFav ? "active" : "")" type="submit" aria-label="Favoritar">@Html.Raw(Icons.Heart)</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="property-body">
+                        <div class="property-kicker">@p.Agency · @p.Neighborhood</div>
+                        <h3>@p.Title</h3>
+                        <div class="property-price">@Helpers.FormatPrice(p.Price)</div>
+                        <div class="property-facts">
+                            <span>@p.AreaM2 m²</span><span>@p.Bedrooms dorm.</span><span>@p.Suites suítes</span><span>@p.ParkingSpots vagas</span>
+                        </div>
+                        <div class="match-reasons">
+                            @foreach (var reason in r.Reasons)
+                            {
+                                <span class="pill brand">@reason</span>
+                            }
+                        </div>
+                        <div class="property-footer">
+                            <form method="post" action="/resultados/@Model.Search.Id/selecionar">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="propertyId" value="@p.Id">
+                                <input type="hidden" name="selected" value="@(!r.Selected)">
+                                <label class="select-check">
+                                    <input type="checkbox" checked="@r.Selected" onchange="this.form.requestSubmit()">
+                                    Selecionar
+                                </label>
+                            </form>
+                            @if (!string.IsNullOrEmpty(p.SourceUrl))
+                            {
+                                <a class="btn btn-secondary btn-sm" href="@p.SourceUrl" target="_blank">Ver ficha na origem @Html.Raw(Icons.External)</a>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        }
+    </section>
+
+    <aside class="card selection-panel">
+        <div class="panel-head"><h3>Seleção para envio</h3><span class="pill brand">@selected.Count</span></div>
+        <p class="muted" style="font-size:13px">Revise os imóveis antes de abrir o WhatsApp.</p>
+        <div class="selection-list">
+            @if (selected.Count == 0)
+            {
+                <div class="empty">Nenhum imóvel selecionado.</div>
+            }
+            else
+            {
+                @foreach (var r in selected)
+                {
+                    <div class="selection-item">
+                        <img src="@r.Property!.ImageUrl" alt="">
+                        <div class="meta"><strong>@r.Property.Title</strong><small>@Helpers.FormatPrice(r.Property.Price)</small></div>
+                        <form method="post" action="/resultados/@Model.Search.Id/selecionar">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="propertyId" value="@r.PropertyId">
+                            <input type="hidden" name="selected" value="false">
+                            <button class="icon-btn btn-sm" type="submit">@Html.Raw(Icons.Close)</button>
+                        </form>
+                    </div>
+                }
+            }
+        </div>
+
+        @if (selected.Count > 0)
+        {
+            <form method="post" action="/resultados/@Model.Search.Id/compartilhar">
+                @Html.AntiForgeryToken()
+                <div class="form-group" style="margin-bottom:10px">
+                    <textarea class="textarea" name="Message" style="min-height:80px;font-size:13px" placeholder="Mensagem opcional">Olá, @Model.Search.Client.Name! Separei estes imóveis com maior compatibilidade com o seu perfil. Veja as opções abaixo:</textarea>
+                </div>
+                <button class="btn btn-primary" type="submit" style="width:100%">@Html.Raw(Icons.Whatsapp) Compartilhar seleção</button>
+            </form>
+        }
+        else
+        {
+            <button class="btn btn-primary" style="width:100%" disabled>@Html.Raw(Icons.Whatsapp) Compartilhar seleção</button>
+        }
+    </aside>
+</div>

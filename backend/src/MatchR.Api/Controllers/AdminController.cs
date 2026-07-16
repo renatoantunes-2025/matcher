@@ -1,13 +1,14 @@
 using MatchR.Api.Data;
 using MatchR.Api.Models;
 using MatchR.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MatchR.Api.Controllers;
 
-[Authorize(Roles = nameof(BrokerRole.Admin))]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = nameof(BrokerRole.Admin))]
 public class AdminController(MatchRDbContext db, IAuthService authService) : ApiControllerBase
 {
     [HttpGet("access-requests")]

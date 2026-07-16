@@ -1,0 +1,65 @@
+@model AdminViewModel
+@{
+    ViewData["Title"] = "Administração";
+}
+<div class="page-head">
+    <div>
+        <h1>Administração</h1>
+        <p class="muted">Gerencie usuários, inventário e indicadores básicos do MVP.</p>
+    </div>
+</div>
+
+<div class="grid admin-grid">
+    <article class="card admin-card">
+        <div class="stat-icon">@Html.Raw(Icons.Users)</div>
+        <h3>Aprovação de corretores</h3>
+        <p>@Model.PendingRequests.Count solicitações aguardando análise de dados e CRECI.</p>
+    </article>
+    <article class="card admin-card">
+        <div class="stat-icon">@Html.Raw(Icons.Home)</div>
+        <h3>Inventário</h3>
+        <p>@Model.TotalActiveProperties imóveis ativos de @Model.AgencyCount imobiliárias parceiras.</p>
+        <a class="btn btn-secondary btn-sm" href="/importacao">Gerenciar base</a>
+    </article>
+    <article class="card admin-card">
+        <div class="stat-icon">@Html.Raw(Icons.Settings)</div>
+        <h3>Regras do Match</h3>
+        <p>Pesos atuais: localização 30%, tipo 20%, preço 15% e demais critérios.</p>
+    </article>
+</div>
+
+<div class="card panel" style="margin-top:20px">
+    <div class="panel-head"><h3>Solicitações pendentes</h3><span class="pill brand">@Model.PendingRequests.Count pendentes</span></div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead><tr><th>Corretor</th><th>CRECI</th><th>Solicitado em</th><th>Ação</th></tr></thead>
+            <tbody>
+                @if (Model.PendingRequests.Count == 0)
+                {
+                    <tr><td colspan="4" class="empty">Nenhuma solicitação pendente.</td></tr>
+                }
+                else
+                {
+                    @foreach (var r in Model.PendingRequests)
+                    {
+                        <tr>
+                            <td>@r.Name</td>
+                            <td>@r.Creci</td>
+                            <td>@Helpers.FormatDate(r.CreatedAt)</td>
+                            <td style="display:flex;gap:8px">
+                                <form method="post" action="/admin/solicitacoes/@r.Id/aprovar">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-primary btn-sm" type="submit">Aprovar</button>
+                                </form>
+                                <form method="post" action="/admin/solicitacoes/@r.Id/rejeitar" onsubmit="return confirm('Rejeitar esta solicitação?');">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-secondary btn-sm" type="submit">Rejeitar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

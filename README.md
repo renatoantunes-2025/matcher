@@ -9,8 +9,10 @@ para compartilhar pelo WhatsApp.
 ## Histórico do projeto
 
 O projeto começou como um **protótipo estático** (HTML + CSS + um único `app.js` com
-dados mockados em memória, sem backend, sem persistência). A partir dele foi construído
-um backend completo e o frontend foi modularizado para consumir a API real:
+dados mockados em memória, sem backend, sem persistência). Depois virou uma SPA (JS
+gerando o HTML de cada tela via template strings, consumindo uma API JSON). Na versão
+atual, o frontend é **renderizado no servidor** (ASP.NET Core MVC + Razor Views) — sem
+HTML montado em JavaScript.
 
 1. Protótipo HTML/CSS/JS navegável (dados fake em arrays no `app.js`, sem login real).
 2. Escolha de stack: **ASP.NET Core + SQL Server + IIS**, por já existir servidor IIS e
@@ -18,49 +20,71 @@ um backend completo e o frontend foi modularizado para consumir a API real:
    Microsoft para esse cenário (módulo do IIS mantido pela própria Microsoft).
 3. Backend construído do zero (models, EF Core, JWT, motor de match, importação de
    planilha) — ver seção **Arquitetura**.
-4. Frontend original (`app.js` monolítico) quebrado em **ES modules** (sem build step,
-   pra manter o deploy simples: só copiar arquivos estáticos pro IIS) e conectado à API.
+4. Primeira versão do frontend: SPA em ES modules consumindo a API JSON via `fetch`.
 5. Deploy no IIS + SQL Server do zero, com todos os problemas reais de infraestrutura
    resolvidos no processo — ver **Problemas encontrados no deploy** abaixo, útil caso
    apareçam de novo num novo ambiente.
+6. **Migração da SPA para MVC/Razor Views**: cada tela virou um `Controller` (em
+   `Controllers/Web/`) que consulta o banco direto e retorna `View()`, com o HTML em
+   arquivos `.cshtml` — não em JS. O `wwwroot/js/site.js` que sobrou só faz pequenas
+   interações no DOM já renderizado (slider de preço, menu mobile, auto-submit de
+   checkbox) — nunca constrói HTML. Os controllers de API (`/api/...`) foram mantidos
+   como uma segunda forma de acessar o backend, autenticados por JWT.
 
 ## Stack
 
-- **Backend**: ASP.NET Core 8 Web API + Entity Framework Core + SQL Server, autenticação
-  JWT (BCrypt para hash de senha), motor de match baseado em regras (**sem LLM/IA** —
-  decisão consciente para o MVP, ver seção **Motor de match**).
-- **Frontend**: HTML/CSS/JS puro (ES modules nativos do navegador, sem framework, sem
-  build step), servido como arquivos estáticos pelo próprio ASP.NET Core (`wwwroot/`) —
-  **um único site, uma única porta**, sem CORS para configurar.
+- **Backend**: ASP.NET Core 8 (MVC + Web API) + Entity Framework Core + SQL Server,
+  motor de match baseado em regras (**sem LLM/IA** — decisão consciente para o MVP, ver
+  seção **Motor de match**).
+- **Frontend**: **Razor Views renderizadas no servidor** (`.cshtml`), sem framework JS e
+  sem build step. JavaScript (`wwwroot/js/site.js`) é usado só para pequenas interações
+  (nunca para montar HTML). Servido pelo próprio ASP.NET Core — **um único site, uma
+  única porta**, sem CORS para configurar.
+- **Duas formas de autenticação, lado a lado**:
+  - **Cookie** para as páginas MVC (navegação normal do navegador, formulários com
+    `[ValidateAntiForgeryToken]`).
+  - **JWT Bearer** para o `/api` (pensado para integrações externas — app mobile, outro
+    sistema, etc.), inalterado desde a versão anterior.
 
 ```
 backend/
   MatchR.sln
   src/MatchR.Api/
-    Controllers/         endpoints da API (/api/...)
-    Models/               entidades do banco (EF Core)
+    Controllers/
+      *.cs                  API JSON (/api/...), autenticada por JWT
+      Web/                   MVC — uma classe por área de tela, retornam View()
+        HomeController.cs     landing pública, login, logout, solicitação de acesso
+        DashboardController.cs
+        ClientsController.cs  lista, detalhe, criar/editar/excluir
+        SearchController.cs   formulário de busca (roda o motor de match)
+        ResultsController.cs  resultados, seleção, favoritar, compartilhar
+        FavoritesController.cs, HistoryController.cs
+        AdminController.cs, ImportController.cs   (só role Admin)
+        WebControllerBase.cs  base com BrokerId/BrokerName/IsAdmin a partir do cookie
+    Views/
+      Shared/_Layout.cshtml        shell (sidebar/topbar) das telas internas
+      Shared/_PublicLayout.cshtml  layout enxuto (landing/login)
+      Home/, Dashboard/, Clients/, Search/, Results/, Favorites/, History/, Admin/,
+      Import/                      um .cshtml por tela, mesmo nome da action
+    ViewModels/               modelos usados pelas Views (não confundir com Dtos, que
+                               são só da API JSON)
+    Models/                   entidades do banco (EF Core)
     Data/
-      MatchRDbContext.cs   configuração do EF Core (relações, conversões, índices)
-      DbInitializer.cs     aplica migrations + cria o Admin inicial no startup
-      Migrations/          migrations do EF Core
+      MatchRDbContext.cs       configuração do EF Core (relações, conversões, índices)
+      DbInitializer.cs         aplica migrations + cria o Admin inicial no startup
+      Migrations/               migrations do EF Core
     Services/
-      AuthService.cs        hash de senha (BCrypt) + geração/validação de JWT
-      MatchingService.cs     motor de match por regras
-      BriefingParser.cs      extrai filtros do texto livre do briefing (regex)
-      ImportService.cs       parser de planilha .xlsx/.csv (ClosedXML)
-    Dtos/                 contratos de request/response
-    wwwroot/               frontend publicado
-      index.html
+      AuthService.cs            hash de senha (BCrypt) + geração/validação de JWT
+      MatchingService.cs         motor de match por regras
+      BriefingParser.cs          extrai filtros do texto livre do briefing (regex)
+      ImportService.cs           parser de planilha .xlsx/.csv (ClosedXML)
+    Dtos/                     contratos de request/response só da API JSON
+    Icons.cs, Helpers.cs      SVGs inline e formatação (data, preço, iniciais) usados
+                               pelas Views via @Html.Raw / chamadas diretas
+    wwwroot/
       styles.css
-      assets/               logos (logo-matchr-icon.png, logo-matchr-full.png)
-      js/
-        api.js               cliente HTTP (fetch + JWT), um método por endpoint
-        router.js            roteamento por hash (#/rota), guarda de autenticação
-        shell.js              layout (sidebar/topbar) usado pelas páginas internas
-        icons.js, dom.js, state.js   utilitários
-        components/           modal.js, toast.js
-        pages/                 uma página por tela (dashboard, clients, search, results,
-                                favorites, history, admin, importInventory, login, landing)
+      assets/                   logos (logo-matchr-icon.png, logo-matchr-full.png)
+      js/site.js                 interações pontuais no DOM, nunca gera HTML
 ```
 
 ## Arquitetura do backend
@@ -71,25 +95,45 @@ backend/
 `Favorite` · `ShareEvent` (histórico de buscas e compartilhamentos) · `ImportBatch`
 (log de importações) · `AccessRequest` (solicitação de acesso da landing page).
 
-### Endpoints principais (`Controllers/`, todos sob `/api`, protegidos por JWT exceto login/access-request)
-- `POST /auth/login`, `POST /auth/access-requests` (públicos), `GET /auth/me`
-- `GET/POST/PUT/DELETE /clients`
-- `GET/POST/PUT/DELETE /properties`, `GET /agencies`
-- `POST /searches` (roda o motor de match), `GET /searches/{id}`,
-  `PATCH /searches/{id}/selection`, `POST /searches/{id}/share`
-- `GET/POST/DELETE /favorites`
-- `GET /history` (aceita `?clientId=`)
-- `GET /dashboard/stats|recent-clients|recent-activity`
-- `GET /admin/access-requests`, `POST /admin/access-requests/{id}/approve|reject`,
-  `GET /admin/brokers`, `GET /admin/inventory-summary` (só role `Admin`)
-- `POST /import` (upload de planilha), `GET /import` (histórico de importações)
+### Páginas (MVC, cookie de sessão, `Controllers/Web/`)
+- `GET /` landing pública · `GET/POST /entrar` login · `POST /sair` logout ·
+  `POST /solicitar-acesso` (público, formulário da landing)
+- `GET /dashboard`
+- `GET /clientes`, `GET /clientes/{id}`, `GET+POST /clientes/novo`,
+  `GET+POST /clientes/{id}/editar`, `POST /clientes/{id}/excluir`
+- `GET+POST /busca` (roda o motor de match e redireciona pro resultado)
+- `GET /resultados/{id}`, `POST /resultados/{id}/selecionar|favoritar|compartilhar`
+- `GET /favoritos`, `POST /favoritos/{propertyId}/remover`
+- `GET /historico`
+- `GET /admin` (só role `Admin`), `POST /admin/solicitacoes/{id}/aprovar|rejeitar`
+- `GET+POST /importacao` (só role `Admin`)
+
+### API JSON (`Controllers/*.cs`, todos sob `/api`, JWT Bearer exceto login/access-request)
+- `POST /api/auth/login`, `POST /api/auth/access-requests` (públicos), `GET /api/auth/me`
+- `GET/POST/PUT/DELETE /api/clients`
+- `GET/POST/PUT/DELETE /api/properties`, `GET /api/agencies`
+- `POST /api/searches`, `GET /api/searches/{id}`, `PATCH /api/searches/{id}/selection`,
+  `POST /api/searches/{id}/share`
+- `GET/POST/DELETE /api/favorites`
+- `GET /api/history` (aceita `?clientId=`)
+- `GET /api/dashboard/stats|recent-clients|recent-activity`
+- `GET /api/admin/access-requests`, `POST /api/admin/access-requests/{id}/approve|reject`,
+  `GET /api/admin/brokers`, `GET /api/admin/inventory-summary` (só role `Admin`)
+- `POST /api/import`, `GET /api/import`
 
 ### Autenticação
-JWT stateless. No primeiro start, `DbInitializer` cria um **Admin inicial** (email/senha
-de `appsettings.json` → seção `Admin`). Esse admin aprova as solicitações de acesso da
+Dois esquemas registrados em paralelo (`Program.cs`): **Cookie** (padrão, usado pelas
+páginas MVC) e **JWT Bearer** (exigido explicitamente pelos controllers de API via
+`[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]`, herdado de
+`ApiControllerBase`). Login pelas páginas MVC (`/entrar`) grava um cookie; login pela API
+(`POST /api/auth/login`) devolve um JWT — ambos validam a mesma senha (BCrypt) contra a
+tabela `Brokers`.
+
+No primeiro start, `DbInitializer` cria um **Admin inicial** (email/senha de
+`appsettings.json` → seção `Admin`). Esse admin aprova as solicitações de acesso da
 landing page pela tela **Administração**, o que cria a conta do corretor com uma **senha
-temporária** (gerada e mostrada uma única vez no modal de aprovação — ainda não existe
-tela de "trocar senha" no primeiro login, ver **Próximos passos**).
+temporária** (mostrada uma única vez via toast na aprovação — ainda não existe tela de
+"trocar senha" no primeiro login, ver **Próximos passos**).
 
 ## Motor de match
 

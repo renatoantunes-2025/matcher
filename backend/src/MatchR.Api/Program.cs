@@ -2,13 +2,14 @@ using System.Text;
 using System.Text.Json.Serialization;
 using MatchR.Api.Data;
 using MatchR.Api.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers()
+builder.Services.AddControllersWithViews()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -24,12 +25,24 @@ builder.Services.AddScoped<IImportService, ImportService>();
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()
     ?? throw new InvalidOperationException("Seção 'Jwt' ausente em appsettings.json.");
 
+// Duas formas de autenticar: Cookie para as páginas MVC (navegação normal do
+// navegador) e JWT Bearer para o /api (consumo por outros sistemas/integrações).
+// O padrão é Cookie; os controllers de API pedem o esquema JWT explicitamente.
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
+.AddCookie(options =>
+{
+    options.LoginPath = "/entrar";
+    options.LogoutPath = "/sair";
+    options.AccessDeniedPath = "/entrar";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(jwtSettings.ExpiryMinutes);
+    options.SlidingExpiration = true;
+})
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -63,12 +76,14 @@ else
 }
 
 app.UseHttpsRedirection();
-app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Landing}/{id?}");
 
 app.Run();

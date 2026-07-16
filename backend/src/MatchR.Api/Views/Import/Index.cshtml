@@ -1,0 +1,52 @@
+@model List<ImportBatch>
+@{
+    ViewData["Title"] = "Importação";
+}
+<div class="page-head">
+    <div>
+        <h1>Importar inventário</h1>
+        <p class="muted">Envie uma planilha Excel ou CSV com as colunas Titulo, Bairro, Cidade, Preco, AreaM2, Dormitorios, Suites, Vagas, Tipo, Finalidade, Imobiliaria, ImagemUrl, LinkOrigem e Caracteristicas.</p>
+    </div>
+</div>
+
+<section class="card panel">
+    <form id="uploadForm" method="post" action="/importacao" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="upload-zone" id="uploadZone">
+            <div class="stat-icon" style="margin:0 auto 14px">@Html.Raw(Icons.Upload)</div>
+            <h3 id="selectedFileName">Arraste a planilha para cá</h3>
+            <p class="muted">ou selecione um arquivo .xlsx ou .csv</p>
+            <input id="fileInput" name="file" type="file" accept=".xlsx,.csv" hidden>
+            <button class="btn btn-primary" id="chooseFile" type="button">Selecionar arquivo</button>
+        </div>
+    </form>
+</section>
+
+<section class="card panel" style="margin-top:20px">
+    <div class="panel-head"><h3>Últimas importações</h3></div>
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead><tr><th>Arquivo</th><th>Data</th><th>Registros</th><th>Status</th></tr></thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="4" class="empty">Nenhuma importação registrada ainda.</td></tr>
+                }
+                else
+                {
+                    @foreach (var b in Model)
+                    {
+                        var statusClass = b.Status == ImportStatus.Completed ? "ativo" : b.Status == ImportStatus.Failed ? "lead" : "proposta";
+                        var statusLabel = b.Status == ImportStatus.Completed ? "Concluído" : b.Status == ImportStatus.Failed ? "Falhou" : "Processando";
+                        <tr>
+                            <td>@b.FileName</td>
+                            <td>@Helpers.FormatDate(b.CreatedAt)</td>
+                            <td>@b.RecordCount</td>
+                            <td><span class="status @statusClass">@statusLabel</span></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

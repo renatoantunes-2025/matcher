@@ -1,0 +1,148 @@
+@model SearchFormViewModel
+@{
+    ViewData["Title"] = "Nova busca";
+    var propertyTypes = new (string Value, string Label)[]
+    {
+        ("Casa", "Casa"), ("CasaEmCondominio", "Casa em condomínio"), ("Apartamento", "Apartamento"),
+        ("Cobertura", "Cobertura"), ("CasaDeVila", "Casa de Vila"), ("Duplex", "Duplex"),
+    };
+    var featureGroups = new (string Category, string[] Items)[]
+    {
+        ("Condomínio", new[] { "Academia", "Piscina aquecida", "Lavanderia", "Quadra de tênis" }),
+        ("Comodidade", new[] { "Chuveiro a gás", "Garden", "Ar condicionado", "Varanda" }),
+        ("Bem-estar", new[] { "Rua silenciosa", "Sol da manhã", "Vista livre" }),
+        ("Cômodos", new[] { "Home-office", "Cozinha americana" }),
+        ("Estilo arquitetônico", new[] { "Moderno", "Contemporâneo", "Neoclássico" }),
+    };
+    string[] options = ["Qualquer", "1", "2", "3", "4", "5+"];
+}
+<div class="page-head">
+    <div>
+        <h1>Busca inteligente</h1>
+        <p class="muted">Conte o que o cliente procura. O MatchR interpreta o briefing e prioriza os imóveis mais aderentes.</p>
+    </div>
+</div>
+
+<form method="post" action="/busca">
+    @Html.AntiForgeryToken()
+    <div class="search-layout">
+        <section class="card briefing-card">
+            <div class="form-group">
+                <label>Cliente</label>
+                <select class="select" name="ClientId" required>
+                    <option value="">Selecione o cliente</option>
+                    @foreach (var c in Model.Clients)
+                    {
+                        <option value="@c.Id" selected="@(Model.ClientId == c.Id)">@c.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group" style="margin-top:18px">
+                <label>Apelido da Oportunidade</label>
+                <input class="input" name="Label" placeholder="Ex.: Apartamento Mariana – Itaim">
+            </div>
+            <div class="form-group" style="margin-top:18px">
+                <label>Briefing em linguagem natural</label>
+                <textarea class="textarea" name="BriefingText" id="briefing" placeholder="Descreva o que o cliente procura...">@Model.Briefing</textarea>
+            </div>
+            <div class="prompt-examples">
+                <button type="button" class="prompt-chip">Casa em condomínio com piscina</button>
+                <button type="button" class="prompt-chip">Cobertura próxima ao parque</button>
+                <button type="button" class="prompt-chip">Imóvel com home office</button>
+            </div>
+            <div class="search-bottom">
+                <div class="ai-note">@Html.Raw(Icons.Spark) O texto livre será combinado aos filtros.</div>
+                <button class="btn btn-primary" type="submit">Buscar imóveis @Html.Raw(Icons.Arrow)</button>
+            </div>
+        </section>
+
+        <aside class="card filters-card">
+            <div class="panel-head"><h3>Filtros opcionais</h3></div>
+            <div class="filters-grid">
+                <div class="form-group filter-span"><label>Localização</label><input class="input" name="Location" placeholder="Ex.: Itaim Bibi, Vila Nova Conceição"></div>
+                <div class="form-group">
+                    <label>Tipo</label>
+                    <select class="select" name="Type">
+                        <option value="">Qualquer tipo</option>
+                        @foreach (var t in propertyTypes)
+                        {
+                            <option value="@t.Value">@t.Label</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Finalidade</label>
+                    <select class="select" name="Purpose">
+                        <option value="Compra">Compra</option>
+                        <option value="Locacao">Locação</option>
+                    </select>
+                </div>
+                <div class="form-group filter-span">
+                    <label>Imobiliária</label>
+                    <select class="select" name="AgencyId">
+                        <option value="">Todas as imobiliárias</option>
+                        @foreach (var a in Model.Agencies)
+                        {
+                            <option value="@a.Id">@a.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group filter-span">
+                    <label>Faixa de preço</label>
+                    <div class="price-range">
+                        <div class="range-track">
+                            <div class="range-fill" id="priceFill"></div>
+                            <input type="range" id="priceMinRange" name="PriceMinRange" min="0" max="20" step="0.5" value="0" aria-label="Preço mínimo em milhões">
+                            <input type="range" id="priceMaxRange" name="PriceMaxRange" min="0" max="20" step="0.5" value="20" aria-label="Preço máximo em milhões">
+                        </div>
+                        <div class="range-values">
+                            <div class="range-value"><span>Mín.</span><strong id="priceMinLabel">Sem mínimo</strong></div>
+                            <span class="range-separator">–</span>
+                            <div class="range-value"><span>Máx.</span><strong id="priceMaxLabel">R$ 20 mi+</strong></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group filter-span"><label>Área mínima (m²)</label><input class="input" name="MinArea" type="number" min="0" placeholder="Ex.: 220"></div>
+
+                @{ await RenderOptionGroup("Dormitórios", "Dormitorios", options); }
+                @{ await RenderOptionGroup("Suítes", "Suites", options); }
+                @{ await RenderOptionGroup("Vagas", "Vagas", options); }
+
+                <div class="filter-span additional-features">
+                    <h4>Itens adicionais</h4>
+                    @foreach (var group in featureGroups)
+                    {
+                        <section class="feature-check-group">
+                            <h5>@group.Category</h5>
+                            <div class="feature-check-grid">
+                                @foreach (var item in group.Items)
+                                {
+                                    <label class="check-option"><input type="checkbox" name="Features" value="@item"><span>@item</span></label>
+                                }
+                            </div>
+                        </section>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+</form>
+
+@{
+    async Task RenderOptionGroup(string label, string name, string[] opts)
+    {
+        <div class="form-group filter-span number-filter">
+            <label>@label</label>
+            <div class="option-buttons" role="group" aria-label="@name">
+                @for (var i = 0; i < opts.Length; i++)
+                {
+                    <label class="option-button">
+                        <input type="radio" name="@name" value="@opts[i]" checked="@(i == 0)">
+                        <span>@opts[i]</span>
+                    </label>
+                }
+            </div>
+        </div>
+        await Task.CompletedTask;
+    }
+}

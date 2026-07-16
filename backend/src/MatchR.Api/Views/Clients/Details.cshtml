@@ -1,0 +1,62 @@
+@model ClientDetailViewModel
+@{
+    ViewData["Title"] = Model.Client.Name;
+    var c = Model.Client;
+}
+<div class="page-head">
+    <div>
+        <div class="muted" style="font-size:13px"><a href="/clientes">Clientes</a> / @c.Name</div>
+        <h1>@c.Name</h1>
+    </div>
+    <div style="display:flex;gap:10px">
+        <a class="btn btn-secondary" href="/busca?clientId=@c.Id">Nova busca</a>
+        <a class="btn btn-primary" href="/clientes/@c.Id/editar">Editar cliente</a>
+        <form method="post" action="/clientes/@c.Id/excluir" onsubmit="return confirm('Remover este cliente? Essa ação não pode ser desfeita.');">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-ghost btn-sm" type="submit">Remover</button>
+        </form>
+    </div>
+</div>
+
+<div class="grid profile-grid">
+    <aside class="card profile-card">
+        <div class="profile-top">
+            <div class="avatar">@Helpers.Initials(c.Name)</div>
+            <h2>@c.Name</h2>
+            <span class="status @c.Status.ToString().ToLower()">@c.Status</span>
+        </div>
+        <div class="profile-info">
+            <div class="info-line">@Html.Raw(Icons.Whatsapp)<div><strong>@(c.Phone ?? "—")</strong><div class="muted">Telefone</div></div></div>
+            <div class="info-line">@Html.Raw(Icons.File)<div><strong>@(c.Email ?? "—")</strong><div class="muted">E-mail</div></div></div>
+            <div class="divider"></div>
+            <div>
+                <strong>Preferências gerais</strong>
+                <p class="muted" style="font-size:13px;line-height:1.55">@(string.IsNullOrWhiteSpace(c.Preferences) ? "Nenhuma preferência registrada ainda." : c.Preferences)</p>
+            </div>
+        </div>
+    </aside>
+    <section class="card timeline">
+        <div class="panel-head"><h3>Histórico do cliente</h3></div>
+        @if (Model.Events.Count == 0)
+        {
+            <div class="empty">Nenhum evento registrado ainda.</div>
+        }
+        else
+        {
+            @foreach (var e in Model.Events)
+            {
+                <div class="timeline-item">
+                    <div class="timeline-bullet">@Html.Raw(e.Type == ShareEventType.WhatsAppShare ? Icons.Whatsapp : Icons.Search)</div>
+                    <div>
+                        <h4>@(e.Type == ShareEventType.WhatsAppShare ? "Seleção compartilhada" : "Busca realizada")</h4>
+                        <p>@e.Summary · @Helpers.FormatDate(e.CreatedAt)</p>
+                        @if (e.SearchRequestId is not null)
+                        {
+                            <a href="/resultados/@e.SearchRequestId" class="btn btn-secondary btn-sm" style="margin-top:10px">Ver @e.ResultCount resultados</a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </section>
+</div>

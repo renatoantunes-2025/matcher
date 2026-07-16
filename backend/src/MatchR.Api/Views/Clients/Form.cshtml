@@ -1,0 +1,43 @@
+@model ClientFormViewModel
+@{
+    var isEdit = Model.Id.HasValue;
+    ViewData["Title"] = isEdit ? "Editar cliente" : "Novo cliente";
+    var action = isEdit ? $"/clientes/{Model.Id}/editar" : "/clientes/novo";
+}
+<div class="page-head">
+    <div>
+        <div class="muted" style="font-size:13px"><a href="/clientes">Clientes</a> / @ViewData["Title"]</div>
+        <h1>@ViewData["Title"]</h1>
+    </div>
+</div>
+
+<form class="card" style="padding:26px;max-width:640px" method="post" action="@action">
+    @Html.AntiForgeryToken()
+    <div class="field-row">
+        <div class="form-group">
+            <label>Nome *</label>
+            <input class="input" name="Name" required value="@Model.Name">
+            <span class="muted" style="color:var(--danger);font-size:12px">@Html.ValidationMessage("Name")</span>
+        </div>
+        <div class="form-group">
+            <label>Tipo</label>
+            <select class="select" name="Status">
+                <option value="Lead" selected="@(Model.Status == ClientStatus.Lead)">Lead</option>
+                <option value="Cliente" selected="@(Model.Status == ClientStatus.Cliente)">Cliente</option>
+                <option value="Parceiro" selected="@(Model.Status == ClientStatus.Parceiro)">Parceiro</option>
+            </select>
+        </div>
+    </div>
+    <div class="field-row" style="margin-top:14px">
+        <div class="form-group"><label>Telefone</label><input class="input" name="Phone" value="@Model.Phone"></div>
+        <div class="form-group"><label>E-mail</label><input class="input" name="Email" type="email" value="@Model.Email"></div>
+    </div>
+    <div class="form-group" style="margin-top:14px">
+        <label>Observações</label>
+        <textarea class="textarea" name="Preferences" placeholder="Preferências e contexto do cliente">@Model.Preferences</textarea>
+    </div>
+    <div class="modal-actions" style="padding:18px 0 0;border-top:1px solid var(--line);margin-top:20px">
+        <a class="btn btn-secondary" href="@(isEdit ? $"/clientes/{Model.Id}" : "/clientes")">Cancelar</a>
+        <button class="btn btn-primary" type="submit">Salvar cliente</button>
+    </div>
+</form>

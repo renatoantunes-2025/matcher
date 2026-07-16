@@ -1,0 +1,27 @@
+namespace MatchR.Api;
+
+/// <summary>Raw inline SVG markup for the icon set used across views (via @Html.Raw).</summary>
+public static class Icons
+{
+    private const string ViewBox = "<svg class=\"i\" viewBox=\"0 0 24 24\" aria-hidden=\"true\">{0}</svg>";
+    private static string Wrap(string paths) => string.Format(ViewBox, paths);
+
+    public static readonly string Home = Wrap("<path d=\"M3 11.5 12 4l9 7.5\"/><path d=\"M5.5 10.5V20h13v-9.5\"/><path d=\"M9 20v-6h6v6\"/>");
+    public static readonly string Users = Wrap("<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75\"/>");
+    public static readonly string Search = Wrap("<circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/>");
+    public static readonly string Heart = Wrap("<path d=\"M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z\"/>");
+    public static readonly string Clock = Wrap("<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>");
+    public static readonly string Settings = Wrap("<circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.4.3.6.7.6 1.2v3.6c0 .5-.2.9-.6 1.2Z\"/>");
+    public static readonly string Upload = Wrap("<path d=\"M12 16V4\"/><path d=\"m7 9 5-5 5 5\"/><path d=\"M5 20h14\"/>");
+    public static readonly string Plus = Wrap("<path d=\"M12 5v14M5 12h14\"/>");
+    public static readonly string Menu = Wrap("<path d=\"M4 6h16M4 12h16M4 18h16\"/>");
+    public static readonly string Bell = Wrap("<path d=\"M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9\"/><path d=\"M10 21h4\"/>");
+    public static readonly string Arrow = Wrap("<path d=\"m9 18 6-6-6-6\"/>");
+    public static readonly string External = Wrap("<path d=\"M14 3h7v7M10 14 21 3\"/><path d=\"M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5\"/>");
+    public static readonly string Whatsapp = Wrap("<path d=\"M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.2A8.5 8.5 0 1 1 21 11.5Z\"/><path d=\"M8.5 8.5c.5 3 2 4.5 5 5\"/>");
+    public static readonly string Filter = Wrap("<path d=\"M4 6h16M7 12h10M10 18h4\"/>");
+    public static readonly string Close = Wrap("<path d=\"m6 6 12 12M18 6 6 18\"/>");
+    public static readonly string File = Wrap("<path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z\"/><path d=\"M14 2v6h6\"/>");
+    public static readonly string Check = Wrap("<path d=\"m5 12 4 4L19 6\"/>");
+    public static readonly string Spark = Wrap("<path d=\"m12 3 1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7Z\"/><path d=\"m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8Z\"/>");
+}

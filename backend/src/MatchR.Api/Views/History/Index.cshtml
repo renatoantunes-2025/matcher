@@ -1,0 +1,44 @@
+@model List<ShareEvent>
+@{
+    ViewData["Title"] = "Histórico";
+}
+<div class="page-head">
+    <div>
+        <h1>Histórico</h1>
+        <p class="muted">Buscas e compartilhamentos registrados por cliente.</p>
+    </div>
+</div>
+
+<div class="card table-wrap">
+    <table class="data-table">
+        <thead><tr><th>Data</th><th>Cliente</th><th>Ação</th><th>Resumo</th><th>Resultado</th></tr></thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="5" class="empty">Nenhum evento registrado ainda.</td></tr>
+            }
+            else
+            {
+                @foreach (var e in Model)
+                {
+                    <tr>
+                        <td>@Helpers.FormatDate(e.CreatedAt)</td>
+                        <td>@e.Client!.Name</td>
+                        <td><span class="pill @(e.Type == ShareEventType.WhatsAppShare ? "success" : "brand")">@(e.Type == ShareEventType.WhatsAppShare ? "WhatsApp" : "Busca")</span></td>
+                        <td>@e.Summary</td>
+                        <td>
+                            @if (e.SearchRequestId is not null)
+                            {
+                                <a href="/resultados/@e.SearchRequestId"><strong>@e.ResultCount resultados</strong></a>
+                            }
+                            else
+                            {
+                                @($"{e.ResultCount} imóveis enviados")
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
