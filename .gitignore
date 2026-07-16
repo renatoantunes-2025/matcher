@@ -1,0 +1,10 @@
+## .NET
+backend/**/bin/
+backend/**/obj/
+*.user
+
+## Publish output
+backend/publish/
+
+## OS/editor
+.DS_Store
