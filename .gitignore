@@ -6,5 +6,9 @@ backend/**/obj/
 ## Publish output
 backend/publish/
 
+## SASS-compiled CSS (regenerated on every build/publish from Styles/*.scss)
+backend/src/MatchR.Api/wwwroot/styles.css
+backend/src/MatchR.Api/wwwroot/styles.css.map
+
 ## OS/editor
 .DS_Store

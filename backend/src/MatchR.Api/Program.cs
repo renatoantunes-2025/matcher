@@ -14,6 +14,12 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+#if DEBUG
+// Recompiles Styles/*.scss into wwwroot/styles.css automatically while developing.
+// Not needed in Release: the SCSS is compiled once during dotnet build/publish.
+builder.Services.AddSassCompiler();
+#endif
+
 builder.Services.AddDbContext<MatchRDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 

@@ -36,10 +36,12 @@ HTML montado em JavaScript.
 - **Backend**: ASP.NET Core 8 (MVC + Web API) + Entity Framework Core + SQL Server,
   motor de match baseado em regras (**sem LLM/IA** — decisão consciente para o MVP, ver
   seção **Motor de match**).
-- **Frontend**: **Razor Views renderizadas no servidor** (`.cshtml`), sem framework JS e
-  sem build step. JavaScript (`wwwroot/js/site.js`) é usado só para pequenas interações
-  (nunca para montar HTML). Servido pelo próprio ASP.NET Core — **um único site, uma
-  única porta**, sem CORS para configurar.
+- **Frontend**: **Razor Views renderizadas no servidor** (`.cshtml`), sem framework JS.
+  JavaScript (`wwwroot/js/site.js`) é usado só para pequenas interações (nunca para
+  montar HTML). Servido pelo próprio ASP.NET Core — **um único site, uma única porta**,
+  sem CORS para configurar.
+- **CSS em SASS**, compilado automaticamente pelo próprio `dotnet build`/`publish` (pacote
+  `AspNetCore.SassCompiler`, sem depender de Node.js) — ver seção **Estilos (SASS)**.
 - **Duas formas de autenticação, lado a lado**:
   - **Cookie** para as páginas MVC (navegação normal do navegador, formulários com
     `[ValidateAntiForgeryToken]`).
@@ -81,8 +83,15 @@ backend/
     Dtos/                     contratos de request/response só da API JSON
     Icons.cs, Helpers.cs      SVGs inline e formatação (data, preço, iniciais) usados
                                pelas Views via @Html.Raw / chamadas diretas
+    Styles/                   fonte SASS (.scss) — ver seção Estilos (SASS)
+      styles.scss               entry point, @use de todos os partials abaixo
+      _variables.scss            tokens de design como CSS custom properties
+      _base.scss, _common.scss   reset e componentes compartilhados (botões, cards, forms)
+      _landing.scss, _auth.scss, _shell.scss, _dashboard.scss, _clients.scss,
+      _search.scss, _results.scss, _favorites.scss, _admin.scss, _modal.scss
+      _responsive.scss           as 3 media queries do layout, por último
     wwwroot/
-      styles.css
+      styles.css                 gerado a partir de Styles/ — não versionado, não edite
       assets/                   logos (logo-matchr-icon.png, logo-matchr-full.png)
       js/site.js                 interações pontuais no DOM, nunca gera HTML
 ```
@@ -134,6 +143,26 @@ No primeiro start, `DbInitializer` cria um **Admin inicial** (email/senha de
 landing page pela tela **Administração**, o que cria a conta do corretor com uma **senha
 temporária** (mostrada uma única vez via toast na aprovação — ainda não existe tela de
 "trocar senha" no primeiro login, ver **Próximos passos**).
+
+## Estilos (SASS)
+
+O CSS é escrito em **SASS** (`Styles/*.scss`) e compilado automaticamente para
+`wwwroot/styles.css` pelo pacote `AspNetCore.SassCompiler` — sem Node.js, sem passo de
+build separado: `dotnet build`/`dotnet run`/`dotnet publish` já compilam. O
+`wwwroot/styles.css` **não é versionado** (está no `.gitignore`, é sempre regenerado) —
+**edite sempre os arquivos em `Styles/`**, nunca o `.css` final.
+
+- Tokens de design (cores, raio, sombra) ficam em `_variables.scss` como **CSS custom
+  properties** (`var(--brand)` etc.), não como variáveis SASS — assim continuam
+  inspecionáveis/alteráveis em runtime pelo devtools do navegador.
+- Um partial por área de tela (`_landing.scss`, `_dashboard.scss`, `_search.scss` etc.),
+  espelhando a mesma divisão das Views.
+- Cada seletor é definido **uma única vez** — a versão anterior do CSS (herdada do
+  protótipo) tinha uma seção "requested refinements" no final que reescrevia regras já
+  declaradas antes (ex.: `.landing-nav` aparecia duas vezes); isso foi consolidado.
+- Em desenvolvimento (`dotnet run` em build Debug), um watcher recompila o SCSS a cada
+  salvamento (`builder.Services.AddSassCompiler()` em `Program.cs`, só ativo em `#if
+  DEBUG`). Em produção o SCSS é compilado uma vez, minificado, durante o `dotnet publish`.
 
 ## Motor de match
 

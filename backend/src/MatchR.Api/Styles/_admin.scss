@@ -1,0 +1,44 @@
+.admin-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.admin-card {
+  padding: 22px;
+
+  h3 {
+    margin: 12px 0 8px;
+  }
+
+  p {
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+}
+
+.upload-zone {
+  border: 2px dashed #d4d4d8;
+  border-radius: 20px;
+  padding: 48px 24px;
+  text-align: center;
+  background: #fcfcfc;
+
+  &.drag {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+  }
+}
+
+.progress {
+  height: 8px;
+  background: #ececef;
+  border-radius: 999px;
+  overflow: hidden;
+
+  > span {
+    display: block;
+    height: 100%;
+    background: var(--brand);
+    width: 72%;
+  }
+}

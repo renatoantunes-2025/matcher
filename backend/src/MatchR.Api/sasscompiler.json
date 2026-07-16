@@ -1,0 +1,12 @@
+{
+  "Source": "Styles",
+  "Target": "wwwroot",
+  "Configurations": {
+    "Debug": {
+      "Arguments": "--style=expanded"
+    },
+    "Release": {
+      "Arguments": "--style=compressed --no-source-map"
+    }
+  }
+}

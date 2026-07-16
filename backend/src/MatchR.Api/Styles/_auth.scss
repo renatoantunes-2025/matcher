@@ -1,0 +1,72 @@
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #fff;
+}
+
+.auth-art {
+  padding: 52px;
+  background: linear-gradient(150deg, #ff5b1b 0%, #ff3d00 52%, #211b19 52%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  .logo-full {
+    filter: none;
+  }
+}
+
+.auth-logo-wrap {
+  display: inline-flex;
+  align-self: flex-start;
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+
+  .logo-full {
+    width: 184px;
+  }
+}
+
+.auth-quote {
+  max-width: 600px;
+
+  h2 {
+    font-family: Manrope;
+    font-size: 48px;
+    line-height: 1.03;
+    letter-spacing: -0.04em;
+  }
+}
+
+.auth-panel {
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.auth-box {
+  width: min(440px, 100%);
+
+  h1 {
+    font-family: Manrope;
+    font-size: 36px;
+    margin: 12px 0 8px;
+  }
+}
+
+.auth-form {
+  margin-top: 28px;
+  display: grid;
+  gap: 16px;
+}
+
+.auth-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}

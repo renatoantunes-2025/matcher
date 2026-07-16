@@ -1,0 +1,19 @@
+// Design tokens exposed as CSS custom properties (not SASS variables) so they
+// stay available at runtime and can be inspected/overridden in devtools.
+:root {
+  --brand: #ff4b0b;
+  --brand-strong: #e83e00;
+  --brand-soft: #fff1eb;
+  --ink: #171717;
+  --muted: #6f6f73;
+  --line: #e9e9ec;
+  --bg: #f7f7f8;
+  --card: #ffffff;
+  --success: #1f9d65;
+  --warning: #d97706;
+  --danger: #c7372f;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  --radius: 18px;
+  --radius-sm: 12px;
+  --max: 1440px;
+}

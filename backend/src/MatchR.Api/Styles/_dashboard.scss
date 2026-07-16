@@ -1,0 +1,168 @@
+.welcome {
+  padding: 30px;
+  background: linear-gradient(125deg, #fff 0%, #fff6f2 68%, #ffe2d7 100%);
+  position: relative;
+  overflow: hidden;
+
+  &:after {
+    content: "";
+    position: absolute;
+    width: 240px;
+    height: 240px;
+    border-radius: 48px;
+    background: var(--brand);
+    right: -90px;
+    top: -100px;
+    transform: rotate(18deg);
+    opacity: 0.12;
+  }
+
+  h2 {
+    font-family: Manrope;
+    font-size: 32px;
+    margin: 0 0 8px;
+  }
+}
+
+.quick-client {
+  max-width: 390px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.quick-search {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  max-width: 860px;
+  position: relative;
+  z-index: 2;
+
+  .input {
+    min-height: 52px;
+    border-radius: 999px;
+    padding-left: 20px;
+  }
+}
+
+.quick-search-btn {
+  min-width: 176px;
+  white-space: nowrap;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.stats-grid {
+  grid-template-columns: repeat(4, 1fr);
+  margin-top: 20px;
+}
+
+.stat-card {
+  padding: 20px;
+
+  strong {
+    font-size: 28px;
+    display: block;
+  }
+
+  span {
+    font-size: 13px;
+    color: var(--muted);
+  }
+}
+
+.stat-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: var(--brand-soft);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+}
+
+.dashboard-grid {
+  grid-template-columns: 1.35fr 0.65fr;
+  margin-top: 20px;
+}
+
+.panel {
+  padding: 22px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+  }
+}
+
+.client-list {
+  display: grid;
+  gap: 10px;
+}
+
+.client-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+
+  &:hover {
+    background: #fafafa;
+    border-color: var(--line);
+  }
+
+  .meta {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+    }
+
+    small {
+      color: var(--muted);
+    }
+  }
+}
+
+.activity-list {
+  display: grid;
+  gap: 18px;
+}
+
+.activity {
+  display: grid;
+  grid-template-columns: 12px 1fr;
+  gap: 12px;
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  time {
+    font-size: 11px;
+    color: var(--muted);
+  }
+}
+
+.activity-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--brand);
+  border-radius: 50%;
+  margin-top: 5px;
+  box-shadow: 0 0 0 5px var(--brand-soft);
+}

@@ -1,0 +1,19 @@
+// Entry point compiled to wwwroot/styles.css by AspNetCore.SassCompiler.
+// Partials are plain component styles; shared tokens live in _variables.scss
+// as CSS custom properties (var(--brand) etc.), not SASS variables, so they
+// stay inspectable/overridable at runtime.
+@use "variables";
+@use "base";
+@use "common";
+@use "icons";
+@use "landing";
+@use "auth";
+@use "shell";
+@use "dashboard";
+@use "clients";
+@use "search";
+@use "results";
+@use "favorites";
+@use "admin";
+@use "modal";
+@use "responsive";
